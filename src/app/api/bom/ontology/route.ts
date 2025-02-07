@@ -31,27 +31,17 @@ function parseBOM(rawText: string) {
   let missingItems = 6;
   let isHeader = true;
 
-  console.log(lines[13])
-  console.log(insertSpaces(lines[13]))
+  console.log(lines.slice(13))
 
-  for (const line of lines) {
+  for (const line of lines.slice(13)) {
     const insertedSpaces = insertSpaces(line);
     const parts = insertedSpaces.split(" ");
 
-    const lineContainsBomHeader = line.includes("Complete");
-    const detectedNonBomHeader = line.includes("Unit");
+    console.log(parts)
 
-    if (detectedNonBomHeader) {
-      isHeader = false;
-      continue;
-    }
+    const lineContainsBomHeader = line.includes("Complete");
 
     if (lineContainsBomHeader) {
-      isHeader = true;
-      continue;
-    }
-
-    if (isHeader) {
       continue;
     }
 
@@ -64,15 +54,15 @@ function parseBOM(rawText: string) {
       }
 
       if (missingItems === 5) {
-        currentBomItem!.id = part;
+        currentBomItem!.type = part;
       }
 
       if (missingItems === 4) {
-        currentBomItem!.name = insertSpaces(part);
+        currentBomItem!.id = insertSpaces(part);
       }
 
       if (missingItems === 3) {
-        currentBomItem!.unit = part;
+        currentBomItem!.name = part;
       }
 
       if (missingItems === 2) {
@@ -80,7 +70,7 @@ function parseBOM(rawText: string) {
       }
 
       if (missingItems === 1) {
-        currentBomItem!.type = part;
+        currentBomItem!.unit = part;
       }
 
       const newMissingItem = missingItems - 1;
