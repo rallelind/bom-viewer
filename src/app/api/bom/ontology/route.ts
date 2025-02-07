@@ -18,7 +18,20 @@ function parseBOM(lines: string[]) {
   const finalBom: BillOfMaterialItem[] = [];
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+    const currLine = lines[i];
+    // hack for unit on next line with m or stk
+    const nextLine = lines[i + 1];
+
+    let line = currLine;
+
+    switch (nextLine) {
+      case "m":
+        line += " m";
+        break;
+      case "stk":
+        line += " stk";
+        break;
+    }
 
     const parts = line.split(" ");
 
@@ -41,8 +54,8 @@ function parseBOM(lines: string[]) {
     }
 
     if (isNaN(parseFloat(quantity))) {
-        console.log("Invalid quantity", quantity);
-        continue
+      console.log("Invalid quantity", quantity);
+      continue;
     }
 
     finalBom.push({
