@@ -1,4 +1,4 @@
-import useSWR from "swr";
+import { BillOfMaterialItem } from "@/app/api/bom/ontology/route";
 import useSWRMutation from "swr/mutation";
 
 const postFile = async (url: string, { arg }: { arg: File }) => {
@@ -24,7 +24,7 @@ export function useBOMOntologyView() {
     isMutating,
     data: ontologyNodes,
     error: ontologyError,
-  } = useSWRMutation("/api/bom/ontology", postFile);
+  } = useSWRMutation<BillOfMaterialItem[], Error, string, File>("/api/bom/ontology", postFile);
 
   const ontologizePDF = async (file: File) => {
     try {

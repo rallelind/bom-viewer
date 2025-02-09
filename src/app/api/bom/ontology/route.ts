@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import pdf from "pdf-parse";
 
-interface BillOfMaterialItem {
+export interface BillOfMaterialItem {
   type: string;
   level: number;
   id: string;
