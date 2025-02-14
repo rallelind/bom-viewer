@@ -1,6 +1,6 @@
 "use client";
 import "reactflow/dist/style.css";
-import ReactFlow, { Edge, useEdgesState, useNodesState, Node } from "reactflow";
+import ReactFlow, { Edge, useEdgesState, useNodesState, Node, Position } from "reactflow";
 import { useBOMOntologyView } from "@/hooks/bom-ontology-view";
 import { ChangeEvent, useRef } from "react";
 import { BillOfMaterialItem } from "@/app/api/bom/ontology/route";
@@ -12,7 +12,11 @@ const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 const nodeWidth = 172;
 const nodeHeight = 36;
 
-const getLayoutedElements = (nodes, edges, direction = "TB") => {
+const getLayoutedElements = (
+  nodes: Node[],
+  edges: Edge[],
+  direction = "TB"
+) => {
   const isHorizontal = direction === "LR";
   dagreGraph.setGraph({ rankdir: direction });
 
@@ -30,8 +34,8 @@ const getLayoutedElements = (nodes, edges, direction = "TB") => {
     const nodeWithPosition = dagreGraph.node(node.id);
     const newNode = {
       ...node,
-      targetPosition: isHorizontal ? "left" : "top",
-      sourcePosition: isHorizontal ? "right" : "bottom",
+      targetPosition: (isHorizontal ? "left" : "top") as Position,
+      sourcePosition: (isHorizontal ? "right" : "bottom") as Position,
       // We are shifting the dagre node position (anchor=center center) to the top left
       // so it matches the React Flow node anchor point (top left).
       position: {
@@ -77,19 +81,27 @@ export function getInitialOntologyData(
     lowestLevel + 1
   );
 
-  const initialNodes = [root, ...nodesAtTopLevel];
+  const rootNode: Node = {
+    id: String(root.id),
+    data: { label: root.name },
+    type: "input",
+    position: { x: 0, y: 0 },
+  };
 
-  const nodes = initialNodes.map((node) => ({
+  const childNodes: Node[] = nodesAtTopLevel.map((node) => ({
     id: String(node.id),
+    type: "output",
     data: { label: node.name },
     position: { x: 0, y: 0 },
   }));
+
+  const nodes = [rootNode, ...childNodes];
 
   const edges = getInitialEdges(nodes.slice(1), root);
 
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
     nodes,
-    edges,
+    edges
   );
 
   return { nodes: layoutedNodes, edges: layoutedEdges };
@@ -104,7 +116,7 @@ export function getInitialEdges(
     source: root.id,
     target: node.id,
     animated: true,
-    type: "smoothstep"
+    type: "smoothstep",
   }));
 }
 
