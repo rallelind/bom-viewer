@@ -1,5 +1,5 @@
 import { BillOfMaterialItem } from "@/app/api/bom/ontology/route";
-import { BoxesIcon, CogIcon, PackageIcon } from "lucide-react";
+import { BoxesIcon, CogIcon, DollarSign, PackageIcon } from "lucide-react";
 import { ReactNode } from "react";
 import { Handle, NodeProps, Position } from "reactflow";
 
@@ -25,8 +25,8 @@ function BomNodeTypeIcon({
 }
 
 interface BomNode {
-  billOfMaterial: BillOfMaterialItem
-  children: ReactNode
+  billOfMaterial: BillOfMaterialItem;
+  children: ReactNode;
 }
 
 export function BomNode({ billOfMaterial, children }: BomNode) {
@@ -39,8 +39,12 @@ export function BomNode({ billOfMaterial, children }: BomNode) {
           <BomNodeTypeIcon type={type} className="w-4 h-4 text-purple-600" />
         </div>
         <div>
-          <p className="text-xs font-medium">{name}</p>
           <p className="text-gray-500 text-xs">{`${quantity} ${unit}`}</p>
+          <p className="text-xs font-medium">{name}</p>
+          <div className="flex gap-1 text-xs bg-gray-100 items-center px-2 rounded-sm mt-1 w-fit">
+            <DollarSign className="w-3 h-3 text-gray-500" />
+            <p>no price data</p>
+          </div>
         </div>
       </div>
       {children}
@@ -49,22 +53,21 @@ export function BomNode({ billOfMaterial, children }: BomNode) {
 }
 
 export function BomNodeInputNode({ data }: NodeProps<NodeData>) {
-  const { billOfMaterial } = data
+  const { billOfMaterial } = data;
 
   return (
     <BomNode billOfMaterial={billOfMaterial}>
       <Handle type="source" position={Position.Bottom} />
     </BomNode>
-  )
+  );
 }
 
 export function BomNodeOutputNode({ data }: NodeProps<NodeData>) {
-  const { billOfMaterial } = data
+  const { billOfMaterial } = data;
 
   return (
     <BomNode billOfMaterial={billOfMaterial}>
       <Handle type="target" position={Position.Top} />
     </BomNode>
-  )
+  );
 }
-  
