@@ -1,7 +1,15 @@
-import { Handle, NodeProps, Position } from "reactflow";
+import { BillOfMaterialItem } from "@/app/api/bom/ontology/route";
+import { Handle, Node, NodeProps, Position } from "reactflow";
 
-export function BomNode({ data, isConnectable }: NodeProps) {
-  const bomType = data.billOfMaterial.type;
+interface NodeData {
+    billOfMaterialItem: BillOfMaterialItem;
+}
+
+export function BomNode({
+  data,
+  isConnectable,
+}: NodeProps<NodeData>) {
+  const bomType = data.billOfMaterialItem.type;
 
   return (
     <div>
