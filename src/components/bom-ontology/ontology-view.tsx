@@ -29,7 +29,7 @@ export function OntologyView() {
         const nodes = nodesAtTopLevel.map((node, index) => ({
           id: String(node.id),
           data: { label: node.name },
-          position: { x: index * 100, y: index * 100 },
+          position: { x: index * 200, y: 0 },
         }));
         setNodes(nodes);
       } catch (error) {
@@ -45,7 +45,7 @@ export function OntologyView() {
       {isMutating && <p>Uploading file...</p>}
       {ontologyError && <p>Error uploading file: {ontologyError.message}</p>}
 
-      <div style={{ width: "100%", height: "500px", border: "1px solid #ccc" }}>
+      <div className="h-screen w-screen">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -54,9 +54,7 @@ export function OntologyView() {
           proOptions={{
             hideAttribution: true,
           }}
-        >
-          <Controls />
-        </ReactFlow>
+        ></ReactFlow>
       </div>
     </div>
   );
