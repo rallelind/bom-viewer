@@ -1,11 +1,18 @@
 "use client";
 import "reactflow/dist/style.css";
-import ReactFlow, { Edge, useEdgesState, useNodesState, Node, Position } from "reactflow";
+import ReactFlow, {
+  Edge,
+  useEdgesState,
+  useNodesState,
+  Node,
+  Position,
+} from "reactflow";
 import { useBOMOntologyView } from "@/hooks/bom-ontology-view";
 import { ChangeEvent, useRef } from "react";
 import { BillOfMaterialItem } from "@/app/api/bom/ontology/route";
 import { FileBoxIcon } from "lucide-react";
 import dagre from "@dagrejs/dagre";
+import { OntologyViewSideBar } from "./side-bar";
 
 const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
@@ -133,7 +140,7 @@ function EmptyOntologyView({
 
   return (
     <div className="h-full w-full flex items-center justify-center">
-      <div className="w-1/3 h-1/3 bg-white border border-gray-200 p-20 flex justify-center items-center text-center">
+      <div className="w-1/3 h-1/3 bg-white border border-gray-200 p-12 flex justify-center items-center text-center">
         <div className="flex flex-col gap-4 items-center">
           <div className="bg-purple-100 w-fit h-fit p-2">
             <FileBoxIcon className="h-6 w-6 text-purple-600" />
@@ -153,7 +160,7 @@ function EmptyOntologyView({
           </div>
           <button
             onClick={handleClickOnUpload}
-            className="text-xs text-white bg-purple-600 px-6 py-1 disabled:opacity-50"
+            className="text-xs text-white bg-purple-600 px-6 py-1 hover:opacity-80 disabled:opacity-50"
           >
             Upload
           </button>
@@ -185,7 +192,7 @@ export function OntologyView() {
   };
 
   return (
-    <div className="h-screen w-screen bg-zinc-50">
+    <div className="h-screen w-screen bg-zinc-50 flex">
       <div className="h-full w-full">
         {ontologyNodes ? (
           <ReactFlow
@@ -202,6 +209,7 @@ export function OntologyView() {
           <EmptyOntologyView handleFileUpload={handleFileUpload} />
         )}
       </div>
+      <OntologyViewSideBar />
     </div>
   );
 }
