@@ -13,6 +13,7 @@ import { BillOfMaterialItem } from "@/app/api/bom/ontology/route";
 import { FileBoxIcon } from "lucide-react";
 import dagre from "@dagrejs/dagre";
 import { OntologyViewSideBar } from "./side-bar";
+import { BomNode } from "./bom-nodes/bom-production";
 
 const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
@@ -90,19 +91,21 @@ export function getInitialOntologyData(
 
   const rootNode: Node = {
     id: String(root.id),
-    data: { label: root.name },
-    type: "input",
+    data: { billOfMaterial: root },
+    type: "bomNode",
     position: { x: 0, y: 0 },
   };
 
   const childNodes: Node[] = nodesAtTopLevel.map((node) => ({
     id: String(node.id),
-    type: "output",
-    data: { label: node.name },
+    type: "bomNode",
+    data: {
+      billOfMaterial: node,
+    },
     position: { x: 0, y: 0 },
   }));
 
-  const nodes = [rootNode, ...childNodes];
+  const nodes = [rootNode, ...childNodes.slice(5)];
 
   const edges = getInitialEdges(nodes.slice(1), root);
 
@@ -170,6 +173,8 @@ function EmptyOntologyView({
   );
 }
 
+const nodeTypes = { bomNode: BomNode };
+
 export function OntologyView() {
   const { ontologizePDF, ontologyNodes } = useBOMOntologyView();
 
@@ -204,6 +209,7 @@ export function OntologyView() {
             proOptions={{
               hideAttribution: true,
             }}
+            nodeTypes={nodeTypes}
           />
         ) : (
           <EmptyOntologyView handleFileUpload={handleFileUpload} />
