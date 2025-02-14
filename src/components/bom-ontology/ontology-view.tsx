@@ -95,7 +95,7 @@ export function getInitialOntologyData(
     position: { x: 0, y: 0 },
   }));
 
-  const nodes = [rootNode, ...childNodes];
+  const nodes = [rootNode, ...childNodes.slice(4)];
 
   const edges = getInitialEdges(nodes.slice(1), root);
 

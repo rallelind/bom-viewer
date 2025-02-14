@@ -10,6 +10,17 @@ export interface BillOfMaterialItem {
   quantity: number;
 }
 
+interface PDFItem {
+  str: string;
+  transform: number[];
+  // add other properties if needed, e.g. fontName, dir, etc.
+}
+
+interface PDFTextContent {
+  items: PDFItem[];
+  // add other properties if needed
+}
+
 function parseBOM(lines: string[]) {
   // we start when we get to the first header that contains the word "Level" then we know we start on next line
   // then we make sure that if we have the first level 0 then it should have the length of 6
@@ -88,7 +99,7 @@ export async function POST(request: Request) {
 
     const options: pdf.Options = {
       pagerender: (pageData) => {
-        const page = pageData.getTextContent().then((textContent: any) => {
+        const page = pageData.getTextContent().then((textContent: PDFTextContent) => {
           lines.push(
             textContent.items.reduce((acc, item, index, arr) => {
               if (index > 0) {
@@ -131,7 +142,7 @@ export async function POST(request: Request) {
 
     const parsedBom = parseBOM(allLines);
 
-    console.log(parsedBom)
+    console.log(parsedBom);
 
     return NextResponse.json(parsedBom);
   } catch (error) {
