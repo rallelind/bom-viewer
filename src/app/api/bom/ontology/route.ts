@@ -142,8 +142,6 @@ export async function POST(request: Request) {
 
     const parsedBom = parseBOM(allLines);
 
-    console.log(parsedBom);
-
     return NextResponse.json(parsedBom);
   } catch (error) {
     console.error(error);
