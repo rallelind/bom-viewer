@@ -11,51 +11,69 @@ import { useBOMOntologyView } from "@/hooks/bom-ontology-view";
 import { ChangeEvent, useRef } from "react";
 import { BillOfMaterialItem } from "@/app/api/bom/ontology/route";
 import { FileBoxIcon } from "lucide-react";
-import dagre from "@dagrejs/dagre";
 import { OntologyViewSideBar } from "./side-bar";
 import { BomNodeInputNode, BomNodeOutputNode } from "./bom-nodes/bom-nodes";
-
-const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
 const nodeWidth = 172;
 const nodeHeight = 80;
 
-export const getLayoutedElements = (
+export const getRadialLayoutedElements = (
   nodes: Node[],
   edges: Edge[],
-  direction = "TB"
+  center = { x: 0, y: 0 },
+  minRadiusStep = 200
 ) => {
-  const isHorizontal = direction === "LR";
-  dagreGraph.setGraph({ rankdir: direction });
-
+  // Group nodes by level
+  const levels: Record<number, Node[]> = {};
   nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    const level = node.data?.billOfMaterial?.level;
+    if (level === undefined) return;
+    if (!levels[level]) {
+      levels[level] = [];
+    }
+    levels[level].push(node);
   });
 
-  edges.forEach((edge) => {
-    dagreGraph.setEdge(edge.source, edge.target);
+  // Find the minimum and maximum levels
+  const levelKeys = Object.keys(levels).map(Number);
+  const minLevel = Math.min(...levelKeys);
+
+  levelKeys.forEach((level) => {
+    const levelNodes = levels[level];
+    const nodeCount = levelNodes.length;
+
+    // --- DYNAMIC RADIUS CALCULATION ---
+    // 1) Figure out how big a circle we need if we place nodes side by side.
+    //    We multiply nodeWidth by some spacing factor (e.g., 1.2 or 1.5) to leave gaps.
+    const spacingFactor = 1.3;
+    const circumferenceNeeded = nodeCount * nodeWidth * spacingFactor;
+    // 2) Convert circumference to radius: circumference = 2 * π * r => r = circumference / (2π)
+    const dynamicRadius = circumferenceNeeded / (2 * Math.PI);
+
+    // 3) Optionally combine with a "base" radius step, so deeper levels move outward
+    //    at least minRadiusStep from the center:
+    //    i.e., radius based on level + ensuring we meet the dynamic requirement
+    const levelDistance = (level - minLevel) * minRadiusStep;
+    const radius = Math.max(levelDistance, dynamicRadius);
+
+    // Distribute nodes evenly around the circle
+    const angleStep = (2 * Math.PI) / nodeCount;
+    levelNodes.forEach((node, i) => {
+      const angle = i * angleStep;
+      const x = center.x + radius * Math.cos(angle);
+      const y = center.y + radius * Math.sin(angle);
+      node.position = {
+        x: x - nodeWidth / 2,
+        y: y - nodeHeight / 2, // if your nodeHeight is 80
+      };
+
+      // Adjust source/target positions if you like
+      node.targetPosition = Position.Top;
+      node.sourcePosition = Position.Bottom;
+    });
   });
 
-  dagre.layout(dagreGraph);
-
-  const newNodes = nodes.map((node) => {
-    const nodeWithPosition = dagreGraph.node(node.id);
-    const newNode = {
-      ...node,
-      targetPosition: (isHorizontal ? "left" : "top") as Position,
-      sourcePosition: (isHorizontal ? "right" : "bottom") as Position,
-      // We are shifting the dagre node position (anchor=center center) to the top left
-      // so it matches the React Flow node anchor point (top left).
-      position: {
-        x: nodeWithPosition.x - nodeWidth / 2,
-        y: nodeWithPosition.y - nodeHeight / 2,
-      },
-    };
-
-    return newNode;
-  });
-
-  return { nodes: newNodes, edges };
+  return { nodes, edges };
 };
 
 export function getAllNodesAtLevel(
@@ -109,10 +127,8 @@ export function getInitialOntologyData(
 
   const edges = getInitialEdges(nodes.slice(1), root);
 
-  const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-    nodes,
-    edges
-  );
+  const { nodes: layoutedNodes, edges: layoutedEdges } =
+    getRadialLayoutedElements(nodes, edges);
 
   return { nodes: layoutedNodes, edges: layoutedEdges };
 }
