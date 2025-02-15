@@ -227,7 +227,12 @@ export function OntologyView() {
   };
 
   const onDisplayConnectedNodes = (nodes: BillOfMaterialItem[]) => {
-    const { nodes: newNodes, edges: newEdges } = getInitialOntologyData(nodes);
+
+    if (!selectedBom) {
+      return;
+    }
+
+    const { nodes: newNodes, edges: newEdges } = getInitialOntologyData([selectedBom, ...nodes]);
     setNodes(newNodes);
     setEdges(newEdges);
   };
@@ -250,11 +255,11 @@ export function OntologyView() {
           <EmptyOntologyView handleFileUpload={handleFileUpload} />
         )}
       </div>
-      <OntologyViewSideBar
+      {selectedBom && <OntologyViewSideBar
         selectedBom={selectedBom}
         ontologyNodes={ontologyNodes}
         onDisplayConnectedNodes={onDisplayConnectedNodes}
-      />
+      />}
     </div>
   );
 }
