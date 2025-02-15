@@ -6,8 +6,6 @@ import ReactFlow, {
   useNodesState,
   Node,
   Position,
-  NodeChange,
-  EdgeChange,
 } from "reactflow";
 import { useBOMOntologyView } from "@/hooks/bom-ontology-view";
 import { ChangeEvent, useRef } from "react";
@@ -22,7 +20,69 @@ const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 const nodeWidth = 172;
 const nodeHeight = 80;
 
-const getLayoutedElements = (
+interface Center {
+  x: number;
+  y: number;
+}
+
+export const getRadialLayoutedElements = (
+  nodes: Node[],
+  edges: Edge[],
+  rootNodeId: string,
+  center: Center,
+  radiusStep: number = 150
+) => {
+  // Create a copy so we don't mutate original nodes
+  const layoutedNodes = [...nodes];
+
+  // Find the root node and set it at the center
+  const rootNode = layoutedNodes.find((node) => node.id === rootNodeId);
+  if (!rootNode) {
+    return { nodes, edges };
+  }
+  // Place the root node so its center aligns with the container center
+  rootNode.position = {
+    x: center.x - nodeWidth / 2,
+    y: center.y - nodeHeight / 2,
+  };
+
+  // Group nodes by their level (assumes each node has node.data.billOfMaterial.level)
+  const nodesByLevel = new Map<number, Node[]>();
+  layoutedNodes.forEach((node) => {
+    // Skip the root node
+    if (node.id === rootNodeId) return;
+    const level = node.data.billOfMaterial.level;
+    if (!nodesByLevel.has(level)) {
+      nodesByLevel.set(level, []);
+    }
+    nodesByLevel.get(level)?.push(node);
+  });
+
+  // Determine the root's level to compute relative distances
+  const rootLevel = rootNode.data.billOfMaterial.level;
+
+  // For each level, compute the positions on a circle
+  // This example assumes that a higher level value means a node is further from the root.
+  nodesByLevel.forEach((nodesOnLevel, level) => {
+    // Calculate radius based on how far this level is from the root level
+    const radius = radiusStep * (level - rootLevel);
+    // Angle between each node on this level
+    const angleIncrement = (2 * Math.PI) / nodesOnLevel.length;
+    let angle = 0;
+    nodesOnLevel.forEach((node) => {
+      // Compute position using trigonometry, subtracting half the node dimensions so
+      // the node's center roughly aligns with the computed point.
+      const x = center.x + radius * Math.cos(angle) - nodeWidth / 2;
+      const y = center.y + radius * Math.sin(angle) - nodeHeight / 2;
+      node.position = { x, y };
+      angle += angleIncrement;
+    });
+  });
+
+  return { nodes: layoutedNodes, edges };
+};
+
+export const getLayoutedElements = (
   nodes: Node[],
   edges: Edge[],
   direction = "TB"
@@ -128,7 +188,6 @@ export function getInitialEdges(
     source: root.id,
     target: node.id,
     animated: true,
-    type: "smoothstep",
   }));
 }
 
@@ -183,8 +242,8 @@ const nodeTypes = {
 export function OntologyView() {
   const { ontologizePDF, ontologyNodes } = useBOMOntologyView();
 
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes] = useNodesState([]);
+  const [edges, setEdges] = useEdgesState([]);
 
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -201,20 +260,6 @@ export function OntologyView() {
     }
   };
 
-  const handleChangeNodes = (newNodes: NodeChange[]) => {
-    const filteredChanges = newNodes.filter(
-      (change) => change.type !== "remove"
-    );
-    onNodesChange(filteredChanges);
-  };
-
-  const handleChangeEdges = (newEdges: EdgeChange[]) => {
-    const filteredChanges = newEdges.filter(
-      (change) => change.type !== "remove"
-    );
-    onEdgesChange(filteredChanges);
-  };
-
   return (
     <div className="h-screen w-screen bg-zinc-50 flex">
       <div className="h-full w-full">
@@ -222,8 +267,6 @@ export function OntologyView() {
           <ReactFlow
             nodes={nodes}
             edges={edges}
-            onNodesChange={handleChangeNodes}
-            onEdgesChange={handleChangeEdges}
             fitView
             proOptions={{
               hideAttribution: true,
