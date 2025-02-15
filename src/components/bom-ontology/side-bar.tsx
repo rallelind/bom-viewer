@@ -1,5 +1,5 @@
 import { BillOfMaterialItem } from "@/app/api/bom/ontology/route";
-import { DatabaseZap, FileSpreadsheet, UploadIcon } from "lucide-react";
+import { DatabaseZap, FileSpreadsheet, NetworkIcon, UploadIcon } from "lucide-react";
 import { BomNode } from "./bom-nodes/bom-nodes";
 
 interface OntologyViewSideBarProps {
@@ -40,8 +40,11 @@ export function OntologyViewSideBar({ selectedBom }: OntologyViewSideBarProps) {
       </div>
       {selectedBom && (
         <BomNode billOfMaterial={selectedBom} displayedInGraph={false}>
-          <div>
-            <p>View all dependencies</p>
+          <div className="mt-4">
+            <button className="flex gap-2 text-xs items-center p-1 w-full justify-center bg-purple-600 text-white">
+              <NetworkIcon className="h-3 w-3" />
+              <p>Display connected items</p>
+            </button>
           </div>
         </BomNode>
       )}
