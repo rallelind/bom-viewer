@@ -6,6 +6,8 @@ import ReactFlow, {
   useNodesState,
   Node,
   Position,
+  NodeChange,
+  EdgeChange,
 } from "reactflow";
 import { useBOMOntologyView } from "@/hooks/bom-ontology-view";
 import { ChangeEvent, useRef } from "react";
@@ -13,10 +15,7 @@ import { BillOfMaterialItem } from "@/app/api/bom/ontology/route";
 import { FileBoxIcon } from "lucide-react";
 import dagre from "@dagrejs/dagre";
 import { OntologyViewSideBar } from "./side-bar";
-import {
-  BomNodeInputNode,
-  BomNodeOutputNode,
-} from "./bom-nodes/bom-nodes";
+import { BomNodeInputNode, BomNodeOutputNode } from "./bom-nodes/bom-nodes";
 
 const dagreGraph = new dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
 
@@ -202,6 +201,20 @@ export function OntologyView() {
     }
   };
 
+  const handleChangeNodes = (newNodes: NodeChange[]) => {
+    const filteredChanges = newNodes.filter(
+      (change) => change.type !== "remove"
+    );
+    onNodesChange(filteredChanges);
+  };
+
+  const handleChangeEdges = (newEdges: EdgeChange[]) => {
+    const filteredChanges = newEdges.filter(
+      (change) => change.type !== "remove"
+    );
+    onEdgesChange(filteredChanges);
+  };
+
   return (
     <div className="h-screen w-screen bg-zinc-50 flex">
       <div className="h-full w-full">
@@ -209,8 +222,8 @@ export function OntologyView() {
           <ReactFlow
             nodes={nodes}
             edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
+            onNodesChange={handleChangeNodes}
+            onEdgesChange={handleChangeEdges}
             fitView
             proOptions={{
               hideAttribution: true,
