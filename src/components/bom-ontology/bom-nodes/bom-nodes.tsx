@@ -8,7 +8,7 @@ interface NodeData {
   billOfMaterial: BillOfMaterialItem;
 }
 
-function BomNodeTypeIcon({
+export function BomNodeTypeIcon({
   type,
   className,
 }: {

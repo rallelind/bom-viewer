@@ -224,7 +224,13 @@ export function OntologyView() {
     }
 
     setSelectedBom(node.data?.billOfMaterial);
-  }
+  };
+
+  const onDisplayConnectedNodes = (nodes: BillOfMaterialItem[]) => {
+    const { nodes: newNodes, edges: newEdges } = getInitialOntologyData(nodes);
+    setNodes(newNodes);
+    setEdges(newEdges);
+  };
 
   return (
     <div className="h-screen w-screen bg-zinc-50 flex">
@@ -244,7 +250,11 @@ export function OntologyView() {
           <EmptyOntologyView handleFileUpload={handleFileUpload} />
         )}
       </div>
-      <OntologyViewSideBar selectedBom={selectedBom} />
+      <OntologyViewSideBar
+        selectedBom={selectedBom}
+        ontologyNodes={ontologyNodes}
+        onDisplayConnectedNodes={onDisplayConnectedNodes}
+      />
     </div>
   );
 }
