@@ -12,6 +12,7 @@
     "@ai-sdk/openai": "^1.1.9",
     "@dagrejs/dagre": "^1.1.4",
     "ai": "^4.1.24",
+    "classnames": "^2.5.1",
     "d3-force": "^3.0.0",
     "lucide-react": "^0.475.0",
     "next": "15.1.6",

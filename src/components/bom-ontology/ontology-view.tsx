@@ -8,7 +8,7 @@ import ReactFlow, {
   Position,
 } from "reactflow";
 import { useBOMOntologyView } from "@/hooks/bom-ontology-view";
-import { ChangeEvent, useRef } from "react";
+import { ChangeEvent, MouseEvent, useRef, useState } from "react";
 import { BillOfMaterialItem } from "@/app/api/bom/ontology/route";
 import { FileBoxIcon } from "lucide-react";
 import { OntologyViewSideBar } from "./side-bar";
@@ -195,6 +195,9 @@ const nodeTypes = {
 
 export function OntologyView() {
   const { ontologizePDF, ontologyNodes } = useBOMOntologyView();
+  const [selectedBom, setSelectedBom] = useState<BillOfMaterialItem | null>(
+    null
+  );
 
   const [nodes, setNodes] = useNodesState([]);
   const [edges, setEdges] = useEdgesState([]);
@@ -214,6 +217,15 @@ export function OntologyView() {
     }
   };
 
+  const onNodeClick = (event: MouseEvent, node: Node) => {
+    if (selectedBom?.id === node.data?.billOfMaterial.id) {
+      setSelectedBom(null);
+      return;
+    }
+
+    setSelectedBom(node.data?.billOfMaterial);
+  }
+
   return (
     <div className="h-screen w-screen bg-zinc-50 flex">
       <div className="h-full w-full">
@@ -221,6 +233,7 @@ export function OntologyView() {
           <ReactFlow
             nodes={nodes}
             edges={edges}
+            onNodeClick={onNodeClick}
             fitView
             proOptions={{
               hideAttribution: true,
@@ -231,7 +244,7 @@ export function OntologyView() {
           <EmptyOntologyView handleFileUpload={handleFileUpload} />
         )}
       </div>
-      <OntologyViewSideBar />
+      <OntologyViewSideBar selectedBom={selectedBom} />
     </div>
   );
 }

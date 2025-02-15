@@ -1,6 +1,12 @@
+import { BillOfMaterialItem } from "@/app/api/bom/ontology/route";
 import { DatabaseZap, FileSpreadsheet, UploadIcon } from "lucide-react";
+import { BomNode } from "./bom-nodes/bom-nodes";
 
-export function OntologyViewSideBar() {
+interface OntologyViewSideBarProps {
+  selectedBom: BillOfMaterialItem | null;
+}
+
+export function OntologyViewSideBar({ selectedBom }: OntologyViewSideBarProps) {
   return (
     <aside className="bg-white h-screen w-1/4 border-l border-gray-200 p-4 flex flex-col gap-4">
       <div>
@@ -32,6 +38,13 @@ export function OntologyViewSideBar() {
           </div>
         </div>
       </div>
+      {selectedBom && (
+        <BomNode billOfMaterial={selectedBom} displayedInGraph={false}>
+          <div>
+            <p>View all dependencies</p>
+          </div>
+        </BomNode>
+      )}
     </aside>
   );
 }

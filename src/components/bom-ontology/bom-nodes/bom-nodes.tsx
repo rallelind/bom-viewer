@@ -2,6 +2,7 @@ import { BillOfMaterialItem } from "@/app/api/bom/ontology/route";
 import { BoxesIcon, CogIcon, DollarSign, PackageIcon } from "lucide-react";
 import { ReactNode } from "react";
 import { Handle, NodeProps, Position } from "reactflow";
+import classNames from "classnames";
 
 interface NodeData {
   billOfMaterial: BillOfMaterialItem;
@@ -27,13 +28,17 @@ function BomNodeTypeIcon({
 interface BomNode {
   billOfMaterial: BillOfMaterialItem;
   children: ReactNode;
+  displayedInGraph?: boolean;
 }
 
-export function BomNode({ billOfMaterial, children }: BomNode) {
+export function BomNode({ billOfMaterial, children, displayedInGraph = true }: BomNode) {
   const { type, name, quantity, unit } = billOfMaterial;
 
   return (
-    <div className="flex flex-col bg-white border border-gray-200 p-4 w-[200px] h-[80px]">
+    <div className={classNames("flex flex-col bg-white border border-gray-200 p-4", {
+      "w-[200px] h-[80px]": displayedInGraph,
+      "w-full h-fit": !displayedInGraph,
+    })}>
       <div className="flex gap-4">
         <div className="bg-purple-200 h-fit w-fit p-2">
           <BomNodeTypeIcon type={type} className="w-4 h-4 text-purple-600" />
